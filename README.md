@@ -26,14 +26,14 @@ REST API
 
 ```
 interface IApplication { 
-	id: number;
-	dateReceived: string;
-	clientCompany: string;
-	carrierName: string;
-	carrierPhoneNumber: string;
-	comments: string;
-	status: Status;
-	atiCode: string;
+  id: number;
+  dateReceived: string;
+  clientCompany: string;
+  carrierName: string;
+  carrierPhoneNumber: string;
+  comments: string;
+  status: Status;
+  atiCode: string;
 }
 ```
 
