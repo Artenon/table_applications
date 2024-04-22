@@ -1,5 +1,5 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { IApplication } from "../types";
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { IApplication } from '../types';
 
 type State = {
   isOpen: boolean;
@@ -14,7 +14,7 @@ const initialState: State = {
 };
 
 export const modalSlice = createSlice({
-  name: "MODAL",
+  name: 'MODAL',
   initialState,
   reducers: {
     changeIsOpen: (state, action: PayloadAction<boolean>) => {

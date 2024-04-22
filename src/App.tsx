@@ -117,7 +117,6 @@ export const App = () => {
             handler: (item) => {
               dispatch(changeIsEditing(true));
               dispatch(changeEditingApplication(item as IApplication));
-              console.log(editingApplication);
               dispatch(changeIsOpen(true));
             },
           },

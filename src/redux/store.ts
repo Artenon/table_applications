@@ -5,6 +5,7 @@ export const store = configureStore({
   reducer: {
     [modalSlice.name]: modalSlice.reducer,
   },
+  middleware: (gDM) => gDM({ serializableCheck: false }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

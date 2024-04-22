@@ -1,29 +1,55 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import block from 'bem-cn-lite';
 import PhoneInput from 'react-phone-number-input/input';
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 import { Button, Icon, Select, Text, TextInput, Modal as UIModal } from '@gravity-ui/uikit';
 import { DatePicker } from '@gravity-ui/date-components';
-import { dateTimeParse } from '@gravity-ui/date-utils';
+import { dateTime, dateTimeParse } from '@gravity-ui/date-utils';
 import { Xmark } from '@gravity-ui/icons';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { changeIsOpen } from '../../redux/slice';
+import { changeEditingApplication, changeIsOpen } from '../../redux/slice';
 import { IApplication, Status } from '../../types';
 
 import './Modal.scss';
 
 const b = block('modal');
-// const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 export const Modal: FC = () => {
   const dispatch = useAppDispatch();
 
   const { isEditing, editingApplication, isOpen } = useAppSelector((state) => state.MODAL);
 
-  const { control, handleSubmit } = useForm<IApplication>();
+  const { control, handleSubmit, setValue } = useForm<IApplication>({
+    defaultValues: {
+      atiCode: '',
+      carrierName: '',
+      carrierPhoneNumber: '',
+      clientCompany: '',
+      comments: '',
+      dateReceived: dateTime(),
+    },
+  });
 
-  const closeHandler = () => dispatch(changeIsOpen(false));
+  const closeHandler = () => {
+    dispatch(changeIsOpen(false));
+    dispatch(changeEditingApplication(null));
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setValue('atiCode', editingApplication ? editingApplication.atiCode : '');
+      setValue('carrierName', editingApplication ? editingApplication.carrierName : '');
+      setValue(
+        'carrierPhoneNumber',
+        editingApplication ? editingApplication.carrierPhoneNumber : ''
+      );
+      setValue('clientCompany', editingApplication ? editingApplication.clientCompany : '');
+      setValue('comments', editingApplication ? editingApplication.comments : '');
+      setValue('dateReceived', editingApplication ? editingApplication.dateReceived : dateTime());
+      setValue('status', editingApplication ? editingApplication.status : Status.New);
+    }
+  }, [isEditing, isOpen, editingApplication]);
 
   const submitHandler: SubmitHandler<IApplication> = (values) => {
     if (!isEditing) {
@@ -110,7 +136,7 @@ export const Modal: FC = () => {
 
             <div className={b('actions')}>
               <Button type="submit" view="action">
-                Создать
+                {isEditing ? 'Изменить' : 'Создать'}
               </Button>
               <Button onClick={closeHandler}>Отмена</Button>
             </div>
