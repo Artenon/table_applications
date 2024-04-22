@@ -11,7 +11,6 @@ import {
   TableActionConfig,
   TableColumnConfig,
   TableDataItem,
-  // eslint-disable-next-line @typescript-eslint/no-redeclare
   Text,
   withTableActions,
   withTableSorting,
@@ -19,9 +18,10 @@ import {
 import { ArrowUpRightFromSquare, Plus } from '@gravity-ui/icons';
 import { Modal } from './components/Modal/Modal';
 import { Wrapper } from './components/Wrapper/Wrapper';
+import { Status } from './components/Status/Status';
 import { useAppDispatch } from './hooks';
 import { changeEditingApplication, changeIsEditing, changeIsOpen } from './redux/slice';
-import { IApplication, Status } from './types';
+import { IApplication, Status as StatusType } from './types';
 import { useDeleteApplicationMutation, useGetAllApplicationsQuery } from './api/api';
 
 const TableActions = withTableActions(Table);
@@ -94,6 +94,7 @@ export const App = () => {
           }
         },
       },
+      template: ({ status }) => <Status status={status} />,
     },
     {
       id: 'atiCode',
@@ -146,7 +147,7 @@ export const App = () => {
 
   const filteredData = data?.filter((e) => {
     if (hideFinished) {
-      return e.status !== Status.Done;
+      return e.status !== StatusType.Done;
     } else {
       return e;
     }

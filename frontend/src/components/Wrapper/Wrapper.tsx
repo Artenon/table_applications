@@ -1,6 +1,5 @@
 import React from 'react';
 import block from 'bem-cn-lite';
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 import { Text, ThemeProvider } from '@gravity-ui/uikit';
 
 import './Wrapper.scss';

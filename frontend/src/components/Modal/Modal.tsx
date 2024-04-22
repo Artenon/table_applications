@@ -2,15 +2,7 @@ import { FC, useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import block from 'bem-cn-lite';
 import PhoneInput from 'react-phone-number-input/input';
-import {
-  Button,
-  Icon,
-  Select,
-  // eslint-disable-next-line @typescript-eslint/no-redeclare
-  Text,
-  TextInput,
-  Modal as UIModal,
-} from '@gravity-ui/uikit';
+import { Button, Icon, Select, Text, TextInput, Modal as UIModal } from '@gravity-ui/uikit';
 import { DatePicker } from '@gravity-ui/date-components';
 import { dateTime, dateTimeParse } from '@gravity-ui/date-utils';
 import { Xmark } from '@gravity-ui/icons';
