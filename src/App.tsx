@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   Button,
   Card,
+  Checkbox,
   Icon,
   Link,
   Loader,
@@ -20,7 +21,7 @@ import { Modal } from './components/Modal/Modal';
 import { Wrapper } from './components/Wrapper/Wrapper';
 import { useAppDispatch } from './hooks';
 import { changeEditingApplication, changeIsEditing, changeIsOpen } from './redux/slice';
-import { IApplication } from './types';
+import { IApplication, Status } from './types';
 import { useDeleteApplicationMutation, useGetAllApplicationsQuery } from './api/api';
 
 const TableActions = withTableActions(Table);
@@ -47,8 +48,36 @@ export const App = () => {
           Date.parse(a.dateReceived) - Date.parse(b.dateReceived),
       },
     },
-    { id: 'clientCompany', name: 'Фирма клиента' },
-    { id: 'carrierName', name: 'ФИО перевозчика' },
+    {
+      id: 'clientCompany',
+      name: 'Фирма клиента',
+      meta: {
+        sort: (a: TableDataItem, b: TableDataItem) => {
+          if (a.clientCompany.toLowerCase() < b.clientCompany.toLowerCase()) {
+            return -1;
+          } else if (a.clientCompany.toLowerCase() > b.clientCompany.toLowerCase()) {
+            return 1;
+          } else {
+            return 0;
+          }
+        },
+      },
+    },
+    {
+      id: 'carrierName',
+      name: 'ФИО перевозчика',
+      meta: {
+        sort: (a: TableDataItem, b: TableDataItem) => {
+          if (a.carrierName.toLowerCase() < b.carrierName.toLowerCase()) {
+            return -1;
+          } else if (a.carrierName.toLowerCase() > b.carrierName.toLowerCase()) {
+            return 1;
+          } else {
+            return 0;
+          }
+        },
+      },
+    },
     { id: 'carrierPhoneNumber', name: 'Контактный телефон перевозчика' },
     { id: 'comments', name: 'Комментарий' },
     {
@@ -79,6 +108,8 @@ export const App = () => {
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const switchAdminClickHandler = () => setIsAdmin((prev) => !prev);
+
+  const [hideFinished, setHideFinished] = useState<boolean>(false);
 
   const getRowActions: () => TableActionConfig<TableDataItem>[] = () => {
     return isAdmin
@@ -113,6 +144,14 @@ export const App = () => {
     }
   }, [isSuccess]);
 
+  const filteredData = data?.filter((e) => {
+    if (hideFinished) {
+      return e.status !== Status.Done;
+    } else {
+      return e;
+    }
+  });
+
   if (isFetching) {
     return (
       <div
@@ -129,7 +168,7 @@ export const App = () => {
     );
   }
 
-  if (!data || isError) {
+  if (!filteredData || !data || isError) {
     return <div>ERROR</div>;
   }
 
@@ -147,8 +186,16 @@ export const App = () => {
           }}
         >
           <div style={{ display: 'flex', gap: '20px', alignItems: 'center', height: '20px' }}>
+            <Checkbox
+              size="l"
+              checked={hideFinished}
+              onChange={(e) => setHideFinished(e.target.checked)}
+            >
+              Скрыть завершенные заявки
+            </Checkbox>
             <Text variant="body-2">Всего заявок: {data.length}</Text>
-
+          </div>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', height: '20px' }}>
             {isAdmin && (
               <>
                 <Button onClick={addClickHandler}>
@@ -158,14 +205,14 @@ export const App = () => {
                 <Modal getAllApplications={refetch} />
               </>
             )}
+            <Switch checked={isAdmin} onChange={switchAdminClickHandler}>
+              Режим администратора
+            </Switch>
           </div>
-          <Switch checked={isAdmin} onChange={switchAdminClickHandler}>
-            Режим администратора
-          </Switch>
         </Card>
         <SortableTable
           columns={columns}
-          data={data}
+          data={filteredData}
           getRowActions={getRowActions}
           stickyHorizontalScroll
           wordWrap

@@ -1,6 +1,7 @@
 import React from 'react';
 import block from 'bem-cn-lite';
-import { ThemeProvider } from '@gravity-ui/uikit';
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+import { Text, ThemeProvider } from '@gravity-ui/uikit';
 
 import './Wrapper.scss';
 
@@ -13,6 +14,9 @@ export type AppProps = {
 export const Wrapper: React.FC<AppProps> = ({ children }) => (
   <ThemeProvider theme="dark">
     <div className={b()}>
+      <header>
+        <Text variant="body-3">Прототип системы ведения заявок</Text>
+      </header>
       <div className={b('content')}>{children}</div>
     </div>
   </ThemeProvider>
