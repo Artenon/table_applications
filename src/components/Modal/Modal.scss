@@ -31,6 +31,18 @@ $block: '.modal';
       border: 1px solid rgba($color: #fff, $alpha: 0.3);
     }
 
+    &__error {
+      border-color: rgba(229, 50, 93, 0.8);
+
+      &:hover {
+        border-color: rgba(229, 50, 93, 0.8);
+      }
+      &:focus-within {
+        outline: 2px solid rgba(229, 50, 93, 0.8);
+        outline-offset: -1px;
+      }
+    }
+
     &__label {
       font-weight: bold;
     }
@@ -43,6 +55,11 @@ $block: '.modal';
       color: rgba($color: #fff, $alpha: 0.85);
       flex-grow: 1;
     }
+  }
+
+  &__error__message {
+    margin-top: 2px;
+    color: rgb(229, 50, 93);
   }
 
   &__actions {

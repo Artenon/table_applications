@@ -16,9 +16,6 @@
     "jsx": "react-jsx",
     "incremental": true,
     "allowSyntheticDefaultImports": true,
-    "paths": {
-      "@/*": ["./src/*"]
-  }
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

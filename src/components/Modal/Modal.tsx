@@ -2,20 +2,32 @@ import { FC, useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import block from 'bem-cn-lite';
 import PhoneInput from 'react-phone-number-input/input';
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-import { Button, Icon, Select, Text, TextInput, Modal as UIModal } from '@gravity-ui/uikit';
+import {
+  Button,
+  Icon,
+  Select,
+  // eslint-disable-next-line @typescript-eslint/no-redeclare
+  Text,
+  TextInput,
+  Modal as UIModal,
+} from '@gravity-ui/uikit';
 import { DatePicker } from '@gravity-ui/date-components';
 import { dateTime, dateTimeParse } from '@gravity-ui/date-utils';
 import { Xmark } from '@gravity-ui/icons';
 import { useAppDispatch, useAppSelector } from '../../hooks';
 import { changeEditingApplication, changeIsOpen } from '../../redux/slice';
+import { useCreateApplicationMutation, useUpdateApplicationMutation } from '../../api/api';
 import { IApplication, Status } from '../../types';
 
 import './Modal.scss';
 
 const b = block('modal');
 
-export const Modal: FC = () => {
+type ModalProps = {
+  getAllApplications: () => {};
+};
+
+export const Modal: FC<ModalProps> = ({ getAllApplications }) => {
   const dispatch = useAppDispatch();
 
   const { isEditing, editingApplication, isOpen } = useAppSelector((state) => state.MODAL);
@@ -27,14 +39,27 @@ export const Modal: FC = () => {
       carrierPhoneNumber: '',
       clientCompany: '',
       comments: '',
-      dateReceived: dateTime(),
+      dateReceived: dateTime().toISOString(),
     },
   });
+
+  const [createApplication, { isLoading: isCreating, isSuccess: isCreateSuccess }] =
+    useCreateApplicationMutation();
+
+  const [updateApplication, { isLoading: isUpdating, isSuccess: isUpdateSuccess }] =
+    useUpdateApplicationMutation();
 
   const closeHandler = () => {
     dispatch(changeIsOpen(false));
     dispatch(changeEditingApplication(null));
   };
+
+  useEffect(() => {
+    if (isCreateSuccess || isUpdateSuccess) {
+      getAllApplications();
+      closeHandler();
+    }
+  }, [isCreateSuccess, isUpdateSuccess]);
 
   useEffect(() => {
     if (isOpen) {
@@ -46,16 +71,25 @@ export const Modal: FC = () => {
       );
       setValue('clientCompany', editingApplication ? editingApplication.clientCompany : '');
       setValue('comments', editingApplication ? editingApplication.comments : '');
-      setValue('dateReceived', editingApplication ? editingApplication.dateReceived : dateTime());
+      setValue(
+        'dateReceived',
+        editingApplication ? editingApplication.dateReceived : dateTime().toISOString()
+      );
       setValue('status', editingApplication ? editingApplication.status : Status.New);
+      if (isEditing) {
+        setValue('id', editingApplication!.id);
+      }
     }
   }, [isEditing, isOpen, editingApplication]);
 
   const submitHandler: SubmitHandler<IApplication> = (values) => {
-    if (!isEditing) {
+    if (isEditing) {
+      values.status = Array.isArray(values.status) ? (values.status[0] as Status) : values.status;
+      updateApplication(values);
+    } else {
       values.status = Status.New;
+      createApplication(values);
     }
-    console.log(values);
   };
 
   return (
@@ -76,7 +110,7 @@ export const Modal: FC = () => {
               render={({ field: { name, onChange, value } }) => (
                 <DatePicker
                   name={name}
-                  onUpdate={onChange}
+                  onUpdate={(date) => onChange(date?.toISOString())}
                   value={dateTimeParse(value)}
                   label="Время получения заявки от клиента"
                   format="DD.MM.YYYY"
@@ -87,24 +121,44 @@ export const Modal: FC = () => {
             <Controller
               control={control}
               name="clientCompany"
-              render={({ field }) => <TextInput {...field} label="Фирма клиента" />}
+              rules={{ required: true }}
+              render={({ field, fieldState: { invalid } }) => (
+                <TextInput
+                  {...field}
+                  label="Фирма клиента"
+                  error={invalid}
+                  errorMessage="Нужно заполнить"
+                />
+              )}
             />
 
             <Controller
               control={control}
               name="carrierName"
-              render={({ field }) => <TextInput {...field} label="ФИО перевозчика" />}
+              rules={{ required: true }}
+              render={({ field, fieldState: { invalid } }) => (
+                <TextInput
+                  {...field}
+                  label="ФИО перевозчика"
+                  error={invalid}
+                  errorMessage="Нужно заполнить"
+                />
+              )}
             />
 
             <Controller
               control={control}
               name="carrierPhoneNumber"
-              render={({ field }) => (
-                <div className={b('phone')}>
-                  <label className={b('phone__label')} htmlFor="phone">
-                    Контактный телефон перевозчика
-                  </label>
-                  <PhoneInput id="phone" {...field} className={b('phone__input')} />
+              rules={{ required: true }}
+              render={({ field, fieldState: { invalid } }) => (
+                <div>
+                  <div className={`${b('phone')} ${invalid && b('phone__error')}`}>
+                    <label className={b('phone__label')} htmlFor="phone">
+                      Контактный телефон перевозчика
+                    </label>
+                    <PhoneInput id="phone" {...field} className={b('phone__input')} />
+                  </div>
+                  {invalid && <div className={b('error__message')}>Нужно заполнить</div>}
                 </div>
               )}
             />
@@ -118,7 +172,15 @@ export const Modal: FC = () => {
             <Controller
               control={control}
               name="atiCode"
-              render={({ field }) => <TextInput {...field} label="ATI код" />}
+              rules={{ required: true }}
+              render={({ field, fieldState: { invalid } }) => (
+                <TextInput
+                  {...field}
+                  label="ATI код"
+                  error={invalid}
+                  errorMessage="Нужно заполнить"
+                />
+              )}
             />
 
             {isEditing && (
@@ -135,7 +197,7 @@ export const Modal: FC = () => {
             )}
 
             <div className={b('actions')}>
-              <Button type="submit" view="action">
+              <Button type="submit" view="action" loading={isCreating || isUpdating}>
                 {isEditing ? 'Изменить' : 'Создать'}
               </Button>
               <Button onClick={closeHandler}>Отмена</Button>

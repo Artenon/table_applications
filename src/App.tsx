@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Card,
   Icon,
   Link,
+  Loader,
   Switch,
   Table,
   TableActionConfig,
@@ -15,52 +16,22 @@ import {
   withTableSorting,
 } from '@gravity-ui/uikit';
 import { ArrowUpRightFromSquare, Plus } from '@gravity-ui/icons';
-import { dateTimeParse } from '@gravity-ui/date-utils';
 import { Modal } from './components/Modal/Modal';
 import { Wrapper } from './components/Wrapper/Wrapper';
-import { useAppDispatch, useAppSelector } from './hooks';
+import { useAppDispatch } from './hooks';
 import { changeEditingApplication, changeIsEditing, changeIsOpen } from './redux/slice';
-import { IApplication, Status } from './types';
+import { IApplication } from './types';
+import { useDeleteApplicationMutation, useGetAllApplicationsQuery } from './api/api';
 
 const TableActions = withTableActions(Table);
 const SortableTable = withTableSorting(TableActions);
 
 export const App = () => {
   const dispatch = useAppDispatch();
-  const { editingApplication, isEditing, isOpen } = useAppSelector((state) => state.MODAL);
 
-  const data: IApplication[] = [
-    {
-      id: 1,
-      dateReceived: dateTimeParse('2024-04-20T10:00:00')!,
-      clientCompany: 'Company A',
-      carrierName: 'John Doe',
-      carrierPhoneNumber: '+1234567890',
-      comments: 'Urgent delivery needed',
-      status: Status.New,
-      atiCode: '12345',
-    },
-    {
-      id: 2,
-      dateReceived: dateTimeParse('2024-04-19T15:30:00')!,
-      clientCompany: 'Company B',
-      carrierName: 'Jane Smith',
-      carrierPhoneNumber: '+9876543210',
-      comments: 'Fragile goods, handle with care',
-      status: Status.Done,
-      atiCode: '67890',
-    },
-    {
-      id: 3,
-      dateReceived: dateTimeParse('2024-04-18T08:45:00')!,
-      clientCompany: 'Company C',
-      carrierName: 'Alex Johnson',
-      carrierPhoneNumber: '+1112223333',
-      comments: 'Delivery address changed, please update',
-      status: Status.Work,
-      atiCode: '13579',
-    },
-  ];
+  const { data, isFetching, isError, refetch } = useGetAllApplicationsQuery('getAll');
+
+  const [deleteApplication, { isSuccess }] = useDeleteApplicationMutation();
 
   const columns: TableColumnConfig<TableDataItem>[] = [
     {
@@ -122,7 +93,9 @@ export const App = () => {
           },
           {
             text: 'Удалить',
-            handler: () => {},
+            handler: ({ id }) => {
+              deleteApplication({ id });
+            },
             theme: 'danger',
           },
         ]
@@ -133,6 +106,32 @@ export const App = () => {
     dispatch(changeIsEditing(false));
     dispatch(changeIsOpen(true));
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      refetch();
+    }
+  }, [isSuccess]);
+
+  if (isFetching) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          width: '100vw',
+          height: '100vh',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Loader size="l" />
+      </div>
+    );
+  }
+
+  if (!data || isError) {
+    return <div>ERROR</div>;
+  }
 
   return (
     <Wrapper>
@@ -156,7 +155,7 @@ export const App = () => {
                   <Icon data={Plus} />
                   Добавить заявку
                 </Button>
-                <Modal />
+                <Modal getAllApplications={refetch} />
               </>
             )}
           </div>

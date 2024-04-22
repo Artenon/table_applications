@@ -1,8 +1,6 @@
-import { DateTime } from '@gravity-ui/date-utils';
-
 export interface IApplication {
   id: number;
-  dateReceived: DateTime;
+  dateReceived: string;
   clientCompany: string;
   carrierName: string;
   carrierPhoneNumber: string;
