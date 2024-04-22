@@ -1,6 +1,6 @@
 Тестовое задание: прототип системы ведения заявок.
 
-Frontend: TypeScript, React, Redux-Toolkit + Query, SCSS, Vite, GravityUI.
+Frontend: TypeScript, React, Redux-Toolkit + Query, SCSS, Vite, GravityUI.  
 Backend: TypeScript, NestJS, sqlite.
 
 Для запуска нужно:
