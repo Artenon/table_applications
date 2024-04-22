@@ -3,6 +3,8 @@
 Frontend: TypeScript, React, Redux-Toolkit + Query, SCSS, Vite, GravityUI.  
 Backend: TypeScript, NestJS, sqlite.
 
+На решение ушло ~ 9 часов.
+
 Для запуска нужно:
 -
 1. Склонировать проект
